@@ -6,8 +6,8 @@ import java.util.List;
 
 public class DataRetriever {
     public Dish findDishById(int id) {
-        String dishquery = "SELECT * FROM dishes WHERE id = ?";
-        String ingredientquery = "SELECT * FROM ingredients WHERE id = ?";
+        String dishquery = "SELECT d.*, i.* FROM dish d LEFT JOIN ingredient i ON i.dish_id = d.id WHERE d.id = ?";
+        String ingredientquery = "SELECT * FROM Ingredient WHERE id = ?";
         try(Connection conn = DBConnection.getConnection()){
             Dish dish;
             try (PreparedStatement ps = conn.prepareStatement(dishquery)){
@@ -42,7 +42,7 @@ public class DataRetriever {
 
 
     public List<Ingredient> findIngredients (int page , int size){
-        String ingredientquery = "SELECT * FROM ingredient limit ? offset ?";
+        String ingredientquery = "SELECT * FROM Ingredient limit ? offset ?";
         List<Ingredient> ingredients = new ArrayList<>();
 
         try(Connection conn = DBConnection.getConnection();
@@ -67,8 +67,8 @@ public class DataRetriever {
 
 
     public List<Ingredient> createIngredients (List<Ingredient> newIngredients){
-        String checkingquery = "SELECT * FROM ingredients WHERE name = ?";
-        String insertionquery = "INSERT INTO ingredients (name, price , category , id_dish) VALUES (?, ? ,? ,?)";
+        String checkingquery = "SELECT * FROM Ingredient WHERE name = ?";
+        String insertionquery = "INSERT INTO Ingredient (name, price , category , id_dish) VALUES (?, ? ,? ,?)";
 
         try (Connection conn = DBConnection.getConnection()){
             conn.setAutoCommit(false);
