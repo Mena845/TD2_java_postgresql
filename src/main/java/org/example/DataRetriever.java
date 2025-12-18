@@ -1,6 +1,6 @@
 package org.example;
-import org.example.DbConnection;
-import org.example.model.*;
+import org.example.DBConnection;
+
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -12,7 +12,7 @@ public class DataRetriever {
         String dishSql = "SELECT * FROM dish WHERE id = ?";
         String ingredientSql = "SELECT * FROM ingredient WHERE id_dish = ?";
 
-        try (Connection conn = DbConnection.getDBConnection()) {
+        try (Connection conn = DBConnection.getConnection()) {
 
             Dish dish;
             try (PreparedStatement ps = conn.prepareStatement(dishSql)) {
@@ -61,7 +61,7 @@ public class DataRetriever {
         String sql = "SELECT * FROM ingredient LIMIT ? OFFSET ?";
         List<Ingredient> ingredients = new ArrayList<>();
 
-        try (Connection conn = DbConnection.getDBConnection();
+        try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setInt(1, size);
@@ -93,7 +93,7 @@ public List<Ingredient> createIngredients(List<Ingredient> newIngredients) {
                 VALUES (?, ?, ?, ?)
                 """;
 
-    try (Connection conn = DBConnection.getDBConnection()) {
+    try (Connection conn = DBConnection.getConnection()) {
         conn.setAutoCommit(false);
 
         try {
