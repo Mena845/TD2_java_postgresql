@@ -1,9 +1,6 @@
 package org.example;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -66,5 +63,42 @@ public class DataRetriever {
             throw new RuntimeException(e);
         }
         return ingredients;
+    }
+
+
+    public List<Ingredient> createIngredients (List<Ingredient> newIngredients){
+        String checkingquery = "SELECT * FROM ingredients WHERE name = ?";
+        String insertionquery = "INSERT INTO ingredients (name, price , category , id_dish) VALUES (?, ? ,? ,?)";
+
+        try (Connection conn = DBConnection.getConnection()){
+            conn.setAutoCommit(false);
+            try{
+                for(Ingredient ing : newIngredients){
+                    try(PreparedStatement check = conn.prepareStatement(checkingquery)){
+                        check.setString(1,ing.getName());
+                        ResultSet rs = check.executeQuery();
+                        rs.next();
+                        if(rs.getInt(1)>0){
+                            throw new RuntimeException("Ingredient already exists"+ing.getName());
+                        }
+                    }
+                    try (PreparedStatement insert = conn.prepareStatement(insertionquery)){
+                        insert.setString(1,ing.getName());
+                        insert.setDouble(2,ing.getPrice());
+                        insert.setString(3,ing.getCategory().name());
+                        insert.setObject(4, ing.getDish() !=null ? ing.getDish().getId() : null , Types.INTEGER);
+                                insert.executeUpdate();
+                    }
+                }
+                conn.commit();
+                return newIngredients;
+            }catch (RuntimeException e){
+                conn.rollback();
+                throw e;
+            }
+        }catch (SQLException e){
+            throw new RuntimeException(e);
+        }
+
     }
 }
