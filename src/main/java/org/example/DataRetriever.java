@@ -42,4 +42,29 @@ public class DataRetriever {
             throw new RuntimeException(e);
         }
     }
+
+
+    public List<Ingredient> findIngredients (int page , int size){
+        String ingredientquery = "SELECT * FROM ingredient limit ? offset ?";
+        List<Ingredient> ingredients = new ArrayList<>();
+
+        try(Connection conn = DBConnection.getConnection();
+        PreparedStatement ps = conn.prepareStatement(ingredientquery)){
+            ps.setInt(1,size);
+            ps.setInt(2,page*size);
+
+            ResultSet rs=ps.executeQuery();
+            while (rs.next()){
+                ingredients.add(new Ingredient(rs.getInt("id"),
+                        rs.getString("name"),
+                        rs.getDouble("price"),
+                        CategoryEnum.valueOf(rs.getString("category")),
+                        null
+                ));
+            }
+        }catch (SQLException e){
+            throw new RuntimeException(e);
+        }
+        return ingredients;
+    }
 }
