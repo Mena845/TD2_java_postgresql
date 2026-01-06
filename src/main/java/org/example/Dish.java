@@ -4,12 +4,12 @@ import java.util.List;
 
 public class Dish {
 
-    private int id;
+    private Integer id;
     private String name;
     private DishTypeEnum dishType;
     private List<Ingredient> ingredients;
 
-    public Dish(int id, String name, DishTypeEnum dishType) {
+    public Dish(Integer id, String name, DishTypeEnum dishType) {
         this.id = id;
         this.name = name;
         this.dishType = dishType;
@@ -25,7 +25,7 @@ public class Dish {
                 .sum();
     }
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 

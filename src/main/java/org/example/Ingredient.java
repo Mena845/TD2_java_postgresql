@@ -3,13 +3,13 @@ package org.example;
 
 public class Ingredient {
 
-    private int id;
+    private Integer id;
     private String name;
     private Double price;
     private CategoryEnum category;
     private Dish dish;
 
-    public Ingredient(int id, String name, Double price, CategoryEnum category, Dish dish) {
+    public Ingredient(Integer id, String name, Double price, CategoryEnum category, Dish dish) {
         this.id = id;
         this.name = name;
         this.price = price;
@@ -28,7 +28,7 @@ public class Ingredient {
         return dish != null ? dish.getName() : null;
     }
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 

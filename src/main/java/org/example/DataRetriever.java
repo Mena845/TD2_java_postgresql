@@ -13,7 +13,9 @@ public class DataRetriever {
             try (PreparedStatement ps = conn.prepareStatement(dishquery)){
                 ps.setInt(1,id);
                 ResultSet rs = ps.executeQuery();
-                if(!rs.next()) return null;
+                if(!rs.next()) {
+                    throw new SQLException("No Dish found with id " + id);
+                };
                 dish = new Dish( rs.getInt("ID"),
                 rs.getString("name"),DishTypeEnum.valueOf(rs.getString("dish_type"))
                 );
@@ -48,7 +50,7 @@ public class DataRetriever {
         try(Connection conn = DBConnection.getConnection();
         PreparedStatement ps = conn.prepareStatement(ingredientquery)){
             ps.setInt(1,size);
-            ps.setInt(2,page*size);
+            ps.setInt(2,(page-1)*size);
 
             ResultSet rs=ps.executeQuery();
             while (rs.next()){
@@ -106,10 +108,10 @@ public class DataRetriever {
         String insertDIsh = "INSERT INTO Dish (name, price, category) VALUES (?,?) RETURNING dish_id";
         String updateDish = "Update dish set name = ?, price = ?, dish_type = ? where id = ?";
         String deleteLinks = "Delete from dish_ingredient where dish_id = ?";
-        String insertLink = "Insert into dish_ingredient(dish_is , ingredient_id) VALUES (?, ?)";
+        String insertLink = "Insert into dish_ingredient(dish_id , ingredient_id) VALUES (?, ?)";
         try (Connection conn = DBConnection.getConnection()){
             conn.setAutoCommit(false);
-            try{ if (dish.getId() == 0){
+            try{ if (dish.getId() ==  null ){
                 try (PreparedStatement ps = conn.prepareStatement(insertDIsh)){
                     ps.setString(1,dish.getName());
                     ps.setString(2,dish.getDishType().name());
@@ -172,7 +174,7 @@ select distinct d.* from dish d join dish_ingredient di on d.id=di.dish_id join
             int size){
         StringBuilder sql = new StringBuilder("""
                 select distinct i.* from ingredient i left join dish_ingredient di on i.id = di.ingredient_id
-                left join dish d on d.id-di.dish_id where 1=1""");
+                left join dish d on d.id=di.dish_id where 1=1""");
         List<Object> params = new ArrayList<>();
         if(ingredientName!=null){
             sql.append(" and lower (i.name) like ? ");
