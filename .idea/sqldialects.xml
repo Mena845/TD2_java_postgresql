@@ -4,5 +4,6 @@
     <file url="file://$PROJECT_DIR$/src/data/data.sql" dialect="PostgreSQL" />
     <file url="file://$PROJECT_DIR$/src/data/init_db.sql" dialect="PostgreSQL" />
     <file url="file://$PROJECT_DIR$/src/data/schema.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/src/main/java/org/example/DataRetriever.java" dialect="GenericSQL" />
   </component>
 </project>

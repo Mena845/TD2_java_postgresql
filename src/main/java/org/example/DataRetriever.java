@@ -109,7 +109,7 @@ public class DataRetriever {
         String insertLink = "Insert into dish_ingredient(dish_is , ingredient_id) VALUES (?, ?)";
         try (Connection conn = DBConnection.getConnection()){
             conn.setAutoCommit(false);
-            try{ if (dish.getId()==null){
+            try{ if (dish.getId() == 0){
                 try (PreparedStatement ps = conn.prepareStatement(insertDIsh)){
                     ps.setString(1,dish.getName());
                     ps.setString(2,dish.getDishType().name());
@@ -119,18 +119,18 @@ public class DataRetriever {
                 }
             }else{ try (PreparedStatement ps = conn.prepareStatement(updateDish)){
                 ps.setString(1,dish.getName());
-                ps.setString(2,dish.getDishType().name())
+                ps.setString(2,dish.getDishType().name());
                 ps.setInt(3,dish.getId());
                 ps.executeUpdate();
             }try (PreparedStatement ps = conn.prepareStatement(deleteLinks)){
                 ps.setInt(1,dish.getId());
-                ps.executeUpdate()
+                ps.executeUpdate();
             }
             }for (Ingredient ing : dish.getIngredients()){
                 try(PreparedStatement ps = conn.prepareStatement(insertLink)){
                     ps.setInt(1 , dish.getId());
                     ps.setInt(2,ing.getId());
-                    ps.executeUpdate()
+                    ps.executeUpdate();
                 }
             } conn.commit();
                 return dish;
@@ -138,6 +138,26 @@ public class DataRetriever {
                 conn.rollback();
                 throw e;
             }
+        }catch (SQLException e){
+            throw new RuntimeException(e);
+        }
+    }
+
+    public List<Dish> findDishByIngredientName(String ingredientName){
+        String checkingquery = """Select distinct d.* from dish d join dish_ingredient di on d.id=di.dish_id join 
+                ingredient i on i.id =di.ingredient_id where lower(i.name) LIKE ?""";
+        List<Dish> dishes = new ArrayList<>();
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps =conn.prepareStatement(checkingquery)){
+            ps.setString(1,"%"+ingredientName.toLowerCase() + "%");
+            ResultSet rs=ps.executeQuery();
+            while (rs.next()){
+                dishes.add(new Dish(rs.getInt("id") ,
+                            rs.getString("name"),
+                            DishTypeEnum.valueOf(rs.getString("dish_type"))
+                ));
+            }
+            return dishes;
         }catch (SQLException e){
             throw new RuntimeException(e);
         }
