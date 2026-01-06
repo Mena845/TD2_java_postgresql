@@ -36,3 +36,19 @@ build/
 
 ### Mac OS ###
 .DS_Store
+
+# IntelliJ
+.idea/
+*.iml
+
+# Maven
+target/
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+cd C:\Users\USER\IdeaProjects\java_jdbc
