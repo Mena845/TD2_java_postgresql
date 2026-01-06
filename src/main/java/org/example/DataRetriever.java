@@ -144,7 +144,8 @@ public class DataRetriever {
     }
 
     public List<Dish> findDishByIngredientName(String ingredientName){
-        String checkingquery = """Select distinct d.* from dish d join dish_ingredient di on d.id=di.dish_id join 
+        String checkingquery = """
+select distinct d.* from dish d join dish_ingredient di on d.id=di.dish_id join
                 ingredient i on i.id =di.ingredient_id where lower(i.name) LIKE ?""";
         List<Dish> dishes = new ArrayList<>();
         try (Connection conn = DBConnection.getConnection();
@@ -158,6 +159,51 @@ public class DataRetriever {
                 ));
             }
             return dishes;
+        }catch (SQLException e){
+            throw new RuntimeException(e);
+        }
+    }
+
+    public List<Ingredient> findIngredientsByCriteria(
+            String ingredientName,
+            CategoryEnum category,
+            String dishName,
+            int page,
+            int size){
+        StringBuilder sql = new StringBuilder("""
+                select distinct i.* from ingredient i left join dish_ingredient di on i.id = di.ingredient_id
+                left join dish d on d.id-di.dish_id where 1=1""");
+        List<Object> params = new ArrayList<>();
+        if(ingredientName!=null){
+            sql.append(" and lower (i.name) like ? ");
+            params.add("%"+ingredientName.toLowerCase() + "%");
+        }
+        if(category!=null){
+            sql.append(" and i.category = ? ");
+            params.add(category);
+        }
+        if(dishName!=null){
+            sql.append(" and lower (d.name) like ? ");
+            params.add("%"+dishName.toLowerCase() + "%");
+        }
+        sql.append(" order by i.id limit ? offset ? ");
+        params.add(size);
+        params.add((page-1)*size);
+        List<Ingredient> ingredients = new ArrayList<>();
+        try (Connection conn = DBConnection.getConnection();
+        PreparedStatement ps=conn.prepareStatement(sql.toString())){
+            for(int i =0;i<params.size();i++){
+                ps.setObject(i+1,params.get(i));
+            }
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()){
+                ingredients.add(new Ingredient(rs.getInt("id"),
+                        rs.getString("name"),
+                        rs.getDouble("price"),
+                        CategoryEnum.valueOf(rs.getString("category")) , null
+                ));
+            }
+            return ingredients;
         }catch (SQLException e){
             throw new RuntimeException(e);
         }
