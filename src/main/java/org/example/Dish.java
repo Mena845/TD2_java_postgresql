@@ -19,7 +19,7 @@ public class Dish {
         this.ingredients = ingredients;
     }
 
-    public Double getDishPrice() {
+    public Double getDishCost() {
         return ingredients.stream()
                 .mapToDouble(Ingredient::getPrice)
                 .sum();

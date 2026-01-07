@@ -50,7 +50,7 @@ public class DataRetriever {
         try(Connection conn = DBConnection.getConnection();
         PreparedStatement ps = conn.prepareStatement(ingredientquery)){
             ps.setInt(1,size);
-            ps.setInt(2,(page-1)*size);
+            ps.setInt(2,page*size);
 
             ResultSet rs=ps.executeQuery();
             while (rs.next()){
@@ -105,14 +105,14 @@ public class DataRetriever {
     }
 
     public Dish saveDish(Dish dish){
-        String insertDIsh = "INSERT INTO Dish (name, price, category) VALUES (?,?) RETURNING dish_id";
+        String insertDish = "INSERT INTO Dish (name, price, category) VALUES (?,?) RETURNING dish_id";
         String updateDish = "Update dish set name = ?, price = ?, dish_type = ? where id = ?";
         String deleteLinks = "Delete from dish_ingredient where dish_id = ?";
         String insertLink = "Insert into dish_ingredient(dish_id , ingredient_id) VALUES (?, ?)";
         try (Connection conn = DBConnection.getConnection()){
             conn.setAutoCommit(false);
             try{ if (dish.getId() ==  null ){
-                try (PreparedStatement ps = conn.prepareStatement(insertDIsh)){
+                try (PreparedStatement ps = conn.prepareStatement(insertDish)){
                     ps.setString(1,dish.getName());
                     ps.setString(2,dish.getDishType().name());
                     ResultSet rs = ps.executeQuery();
@@ -190,7 +190,7 @@ select distinct d.* from dish d join dish_ingredient di on d.id=di.dish_id join
         }
         sql.append(" order by i.id limit ? offset ? ");
         params.add(size);
-        params.add((page-1)*size);
+        params.add(page*size);
         List<Ingredient> ingredients = new ArrayList<>();
         try (Connection conn = DBConnection.getConnection();
         PreparedStatement ps=conn.prepareStatement(sql.toString())){

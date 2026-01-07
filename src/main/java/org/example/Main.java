@@ -22,7 +22,7 @@ public class Main {
             System.out.println("Type : "+dish.getDishType());
 
             dish.getIngredients().forEach(i -> System.out.println("- "+i.getName() +" | "+i.getPrice() + " Ar | " +i.getCategory()));
-            System.out.println("Prix total : "+dish.getDishPrice() +" Ar");
+            System.out.println("Prix total : "+dish.getDishCost() +" Ar");
         }
 
         System.out.println("Test findIngredients (page=0 , size=5)");
