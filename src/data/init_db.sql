@@ -15,3 +15,7 @@ grant create on schema public to mini_dish_db_manager;
 
 -- donner les droit CRUD sur tous les tables
 grant select , insert , update , delete on all tables in schema public to mini_dish_db_manager;
+--Ajout de la colonne required_quantity;
+ALTER TABLE ingredient
+ADD COLUMN IF NOT EXISTS required_quantity DOUBLE PRECISION;
+

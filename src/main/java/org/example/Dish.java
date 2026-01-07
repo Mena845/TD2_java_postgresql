@@ -20,10 +20,24 @@ public class Dish {
     }
 
     public Double getDishCost() {
-        return ingredients.stream()
-                .mapToDouble(Ingredient::getPrice)
-                .sum();
+        if (ingredients == null || ingredients.isEmpty()) {
+            return 0.0;
+        }
+
+        double total = 0.0;
+
+        for (Ingredient ingredient : ingredients) {
+            if (ingredient.getRequiredQuantity() == null) {
+                throw new RuntimeException(
+                        "Quantité requise inconnue pour l'ingrédient : " + ingredient.getName()
+                );
+            }
+            total += ingredient.getPrice() * ingredient.getRequiredQuantity();
+        }
+
+        return total;
     }
+
 
     public Integer getId() {
         return id;
