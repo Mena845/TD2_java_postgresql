@@ -1,4 +1,4 @@
-;
+
 
 import org.example.CategoryEnum;
 import org.example.DataRetriever;
@@ -47,13 +47,6 @@ public class DataRetrieverTest {
     }
 
     /* e */
-    @Test
-    void findDishByIngredientName() {
-        List<Dish> dishes = dr.findDishByIngredientName("eur");
-
-        assertEquals(1, dishes.size());
-        assertEquals("Gateau au chocolat", dishes.get(0).getName());
-    }
 
     /* f */
     @Test

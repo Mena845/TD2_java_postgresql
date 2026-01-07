@@ -35,7 +35,6 @@ public class Main {
         System.out.println("Test createIngredients");
         try{
             Dish dishRef = new Dish(1 , "Test Dish" , DishTypeEnum.MAIN);
-
             List<Ingredient> newIngredients = List.of(new
                     Ingredient("Sel fin",200.0 , CategoryEnum.OTHER,dishRef),
                     new    Ingredient("Poivre vert",150.0 , CategoryEnum.OTHER,dishRef));
@@ -45,5 +44,7 @@ public class Main {
             System.out.println("Echec de l'insertion : "+e.getMessage());
         }
     }
+
+
 
 }

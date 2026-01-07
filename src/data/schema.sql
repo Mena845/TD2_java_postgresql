@@ -27,6 +27,4 @@ create table Ingredient (
     constraint fk_dish foreign key (id_dish) references Dish(id) on delete set null
 );
 
-
-
 select current_database();

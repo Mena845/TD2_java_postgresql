@@ -5,51 +5,46 @@ public class Ingredient {
 
     private Integer id;
     private String name;
-    private Double price;
+    private double price;
     private CategoryEnum category;
+    private Double requiredQuantity;
     private Dish dish;
 
-    public Ingredient(Integer id, String name, Double price, CategoryEnum category, Dish dish) {
+
+    public Ingredient(Integer id, String name, Double price, CategoryEnum category, Double requiredQuantity, Dish dish) {
         this.id = id;
         this.name = name;
         this.price = price;
         this.category = category;
+        this.requiredQuantity = requiredQuantity;
         this.dish = dish;
     }
-
-    public Ingredient(String name, Double price, CategoryEnum category, Dish dish) {
+    public Ingredient(String name, double price, CategoryEnum category, Dish dish) {
         this.name = name;
         this.price = price;
         this.category = category;
         this.dish = dish;
+        this.requiredQuantity = null;
     }
 
-    public String getDishName() {
-        return dish != null ? dish.getName() : null;
+
+    public Ingredient(Integer id, String name, double price, CategoryEnum category, Object requiredQuantity) {
     }
 
-    public Integer getId() {
-        return id;
+    public Dish getDish() {
+        return dish;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setDish(Dish dish) {
+        this.dish = dish;
     }
 
-    public String getName() {
-        return name;
+    public Double getRequiredQuantity() {
+        return requiredQuantity;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public Double getPrice() {
-        return price;
-    }
-
-    public void setPrice(Double price) {
-        this.price = price;
+    public void setRequiredQuantity(Double requiredQuantity) {
+        this.requiredQuantity = requiredQuantity;
     }
 
     public CategoryEnum getCategory() {
@@ -60,12 +55,29 @@ public class Ingredient {
         this.category = category;
     }
 
-    public Dish getDish() {
-        return dish;
+    public Double getPrice() {
+        return price;
     }
 
-    public void setDish(Dish dish) {
-        this.dish = dish;
+    public void setPrice(Double price) {
+        this.price = price;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 }
+
 
