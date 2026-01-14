@@ -28,3 +28,19 @@ create table Ingredient (
 );
 
 select current_database();
+
+
+-- sql
+SET search_path TO public;
+
+BEGIN;
+
+
+CREATE TABLE IF NOT EXISTS dish_ingredient (
+                                               dish_id INT NOT NULL REFERENCES dish(id) ON DELETE CASCADE,
+                                               ingredient_id INT NOT NULL REFERENCES ingredient(id) ON DELETE CASCADE,
+                                               PRIMARY KEY (dish_id, ingredient_id)
+);
+
+COMMIT;
+
