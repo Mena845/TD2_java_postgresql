@@ -15,10 +15,6 @@ public class Dish {
         this.dishType = dishType;
     }
 
-    public void setIngredients(List<Ingredient> ingredients) {
-        this.ingredients = ingredients;
-    }
-
     public Double getDishCost() {
         if (ingredients == null || ingredients.isEmpty()) {
             return 0.0;
@@ -38,29 +34,14 @@ public class Dish {
         return total;
     }
 
+    public Integer getId() { return id; }
+    public void setId(Integer id) { this.id = id; }
 
-    public Integer getId() {
-        return id;
-    }
+    public String getName() { return name; }
+    public DishTypeEnum getDishType() { return dishType; }
 
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public DishTypeEnum getDishType() {
-        return dishType;
-    }
-
-    public void setDishType(DishTypeEnum dishType) {
-        this.dishType = dishType;
+    public void setIngredients(List<Ingredient> ingredients) {
+        this.ingredients = ingredients;
     }
 
     public List<Ingredient> getIngredients() {

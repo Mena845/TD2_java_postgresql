@@ -5,4 +5,3 @@ public enum DishTypeEnum {
     MAIN,
     DESSERT
 }
-

@@ -1,46 +1,19 @@
-create type ingredient_category AS ENUM (
-    'VEGETABLE',
-    'ANIMAL',
-    'MARINE',
-    'DAIRY',
-    'OTHER'
+CREATE TABLE dish (
+                      id SERIAL PRIMARY KEY,
+                      name VARCHAR(100),
+                      dish_type VARCHAR(20)
 );
 
-create type dish_type_enum AS ENUM (
-    'START',
-    'MAIN',
-    'DESSERT'
+CREATE TABLE ingredient (
+                            id SERIAL PRIMARY KEY,
+                            name VARCHAR(100),
+                            price DOUBLE PRECISION,
+                            category VARCHAR(20),
+                            required_quantity DOUBLE PRECISION
 );
 
-create table Dish (
-    id serial primary key ,
-    name varchar(200) not null ,
-    dish_type dish_type_enum
+CREATE TABLE dish_ingredient (
+                                 dish_id INTEGER REFERENCES dish(id),
+                                 ingredient_id INTEGER REFERENCES ingredient(id),
+                                 PRIMARY KEY (dish_id, ingredient_id)
 );
-
-create table Ingredient (
-    id serial primary key ,
-    name varchar(200) not null ,
-    price numeric (10,2),
-    category ingredient_category not null ,
-    id_dish int ,
-    constraint fk_dish foreign key (id_dish) references Dish(id) on delete set null
-);
-
-select current_database();
-
-
--- sql
-SET search_path TO public;
-
-BEGIN;
-
-
-CREATE TABLE IF NOT EXISTS dish_ingredient (
-                                               dish_id INT NOT NULL REFERENCES dish(id) ON DELETE CASCADE,
-                                               ingredient_id INT NOT NULL REFERENCES ingredient(id) ON DELETE CASCADE,
-                                               PRIMARY KEY (dish_id, ingredient_id)
-);
-
-COMMIT;
-
