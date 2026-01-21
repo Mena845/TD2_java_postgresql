@@ -9,17 +9,18 @@ public class Main {
         DataRetriever dr = new DataRetriever();
 
         try {
-            Dish dish = dr.findDishById(1);
+            Dish dish = dr.findDishById(2);
             System.out.println("Plat : " + dish.getName());
             System.out.println("Coût : " + dish.getDishCost());
+            System.out.println("\n--- Ingredients ---");
+            List<Ingredient> ingredients = dr.findDishIngredient(dish.getId());
+            ingredients.forEach(i ->
+                    System.out.println(i.getName()+" | "+i.getPrice()+" | "+i.getCategory())
+            );
         } catch (RuntimeException e) {
             System.out.println("Erreur : " + e.getMessage());
         }
 
-        System.out.println("\n--- Ingredients ---");
-        List<Ingredient> ingredients = dr.findIngredients(0,5);
-        ingredients.forEach(i ->
-                System.out.println(i.getName()+" | "+i.getPrice()+" | "+i.getCategory())
-        );
+
     }
 }

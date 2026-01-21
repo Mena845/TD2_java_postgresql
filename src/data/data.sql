@@ -12,6 +12,8 @@ INSERT INTO ingredient (name, price, category, required_quantity) VALUES
 
 INSERT INTO dish_ingredient VALUES
                                 (1,1),(1,2),(2,3),(3,4),(3,5);
+select ingredient.name
+ from dish_ingredient inner join ingredient on public.dish_ingredient.ingredient_id= ingredient.id where dish_id=1  ;
 
 
 

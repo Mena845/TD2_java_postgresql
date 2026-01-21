@@ -27,6 +27,9 @@ public class Ingredient {
         this.requiredQuantity = null;
     }
 
+    public <T> Ingredient(int id, String name, double price, CategoryEnum category, T requiredQuantity) {
+    }
+
     public Integer getId() { return id; }
     public String getName() { return name; }
     public double getPrice() { return price; }

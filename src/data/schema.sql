@@ -11,6 +11,7 @@ CREATE TABLE ingredient (
                             category VARCHAR(20),
                             required_quantity DOUBLE PRECISION
 );
+alter table ingredient drop column required_quantity;
 
 CREATE TABLE dish_ingredient (
                                  dish_id INTEGER REFERENCES dish(id),
