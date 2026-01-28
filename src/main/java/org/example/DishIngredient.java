@@ -4,7 +4,6 @@ public class DishIngredient {
 
     private Integer dishId;
     private Integer ingredientId;
-
     private Dish dish;
     private Ingredient ingredient;
 

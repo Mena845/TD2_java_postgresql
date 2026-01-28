@@ -8,6 +8,7 @@ public class Dish {
     private String name;
     private DishTypeEnum dishType;
     private List<Ingredient> ingredients;
+    private Double price;
 
     public Dish(Integer id, String name, DishTypeEnum dishType) {
         this.id = id;
@@ -47,4 +48,21 @@ public class Dish {
     public List<Ingredient> getIngredients() {
         return ingredients;
     }
+    public Double getPrice() {
+        return price;
+    }
+
+    public void setPrice(Double price) {
+        this.price = price;
+    }
+    public Double getGrossMargin() {
+        if (price == null) {
+            throw new RuntimeException("Prix de vente du plat inconnu");
+        }
+
+        Double cost = getDishCost();
+        return price - cost;
+    }
+
+
 }
