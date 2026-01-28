@@ -1,5 +1,7 @@
 package org.example;
 
+import java.util.List;
+
 public class Ingredient {
 
     private Integer id;
@@ -8,6 +10,7 @@ public class Ingredient {
     private CategoryEnum category;
     private Double requiredQuantity;
     private Dish dish;
+    private List<StockMouvement>
 
     public Ingredient(Integer id, String name, double price,
                       CategoryEnum category, Double requiredQuantity, Dish dish) {
