@@ -23,7 +23,7 @@ create type mouvement_type as enum ('IN','OUT');
 CREATE TYPE unit_type AS ENUM ('KG');
 
 
-CREATE table stock_mouvement (
+CREATE table stock_movement (
                             id SERIAL primary key ,
                             id_ingredient int,
                             quantity numeric (10 ,2) ,
@@ -31,4 +31,10 @@ CREATE table stock_mouvement (
                             type mouvement_type,
                             creation_datetime timestamp with time zone,
                             foreign key (id_ingredient) references ingredient(id)
+)
+
+create table order (
+    id serial primary key ,
+    reference varchar(255),
+    creation_dateTime timestamp with time zone
 )
