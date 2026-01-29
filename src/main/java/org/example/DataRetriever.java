@@ -287,8 +287,8 @@ public class DataRetriever {
         String sql = """
         SELECT o.id, o.reference, o.creation_datetime, o.payment_status,
                s.id AS sale_id, s.creation_datetime AS sale_datetime
-        FROM "order" o
-        LEFT JOIN sale s ON s.id_order = o.id
+        FROM "orders" o
+        LEFT JOIN sale s ON s.order_id = o.id
         WHERE o.reference = ?
     """;
 
@@ -329,6 +329,82 @@ public class DataRetriever {
             throw new RuntimeException(e);
         }
     }
+
+
+
+    public Order saveOrder(Order orderToSave) {
+
+        if (orderToSave == null) {
+            throw new IllegalArgumentException("Commande invalide");
+        }
+
+        String insertSql = """
+        INSERT INTO orders (reference, creation_datetime, payment_status)
+        VALUES (?, ?, ?)
+        RETURNING id
+    """;
+
+        String updateSql = """
+        UPDATE orders
+        SET payment_status = ?
+        WHERE id = ?
+    """;
+
+        String checkStatusSql = """
+        SELECT payment_status FROM orders WHERE id = ?
+    """;
+
+        try (Connection conn = DBConnection.getConnection()) {
+
+            /* ===== Création ===== */
+            if (orderToSave.getId() == null) {
+
+                try (PreparedStatement ps = conn.prepareStatement(insertSql)) {
+                    ps.setString(1, orderToSave.getReference());
+                    ps.setTimestamp(2, Timestamp.from(orderToSave.getCreationDatetime()));
+                    ps.setString(3, orderToSave.getPaymentStatus().name());
+
+                    try (ResultSet rs = ps.executeQuery()) {
+                        rs.next();
+                        orderToSave.setId(rs.getInt(1));
+                    }
+                }
+
+                return orderToSave;
+            }
+
+            /* ===== Vérifier statut PAYÉ ===== */
+            try (PreparedStatement check = conn.prepareStatement(checkStatusSql)) {
+                check.setInt(1, orderToSave.getId());
+
+                try (ResultSet rs = check.executeQuery()) {
+                    if (rs.next()) {
+                        PaymentStatusEnum current =
+                                PaymentStatusEnum.valueOf(rs.getString("payment_status"));
+
+                        if (current == PaymentStatusEnum.PAID) {
+                            throw new IllegalStateException(
+                                    "La commande est déjà payée et ne peut plus être modifiée"
+                            );
+                        }
+                    }
+                }
+            }
+
+            /* ===== Mise à jour ===== */
+            try (PreparedStatement ps = conn.prepareStatement(updateSql)) {
+                ps.setString(1, orderToSave.getPaymentStatus().name());
+                ps.setInt(2, orderToSave.getId());
+                ps.executeUpdate();
+            }
+
+            return orderToSave;
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 
 
 

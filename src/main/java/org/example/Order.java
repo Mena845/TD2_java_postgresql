@@ -9,7 +9,8 @@ public class Order {
     private String reference;
     private Instant creationDatetime;
     private PaymentStatusEnum paymentStatus;
-    private List<Dish> dishes; // ou DishOrder selon ton modèle
+    private List<Dish> dishes;
+    private Sale sale;
 
     public Order(Integer id, String reference, Instant creationDatetime, PaymentStatusEnum paymentStatus) {
         this.id = id;
@@ -56,5 +57,21 @@ public class Order {
 
     public List<Dish> getDishes() {
         return dishes;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public void setReference(String reference) {
+        this.reference = reference;
+    }
+
+    public void setCreationDatetime(Instant creationDatetime) {
+        this.creationDatetime = creationDatetime;
+    }
+
+    public void setSale(Sale sale) {
+        this.sale = sale;
     }
 }
