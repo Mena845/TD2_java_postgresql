@@ -186,4 +186,40 @@ public class DataRetriever {
             throw new RuntimeException(e);
         }
     }
+
+    public Ingredient saveIngredient(Ingredient ingredientToSave) {
+
+        String insertStockMovement = """
+        INSERT INTO stock_mouvement
+        (id, id_ingredient, quantity, unit, type, creation_datetime)
+        VALUES (?, ?, ?, ?, ?, ?)
+        ON CONFLICT (id) DO NOTHING
+    """;
+
+        try (Connection conn = DBConnection.getConnection()) {
+            conn.setAutoCommit(false);
+
+            for (StockMovement sm : ingredientToSave.getStockMovementList()) {
+
+                try (PreparedStatement ps = conn.prepareStatement(insertStockMovement)) {
+
+                    ps.setInt(1, sm.getId());
+                    ps.setInt(2, ingredientToSave.getId());
+                    ps.setDouble(3, sm.getValue().getQuantity());
+                    ps.setString(4, sm.getValue().getUnit().name());
+                    ps.setString(5, sm.getType().name());
+                    ps.setTimestamp(6, Timestamp.from(sm.getCreationDatetime()));
+
+                    ps.executeUpdate();
+                }
+            }
+
+            conn.commit();
+            return ingredientToSave;
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 }

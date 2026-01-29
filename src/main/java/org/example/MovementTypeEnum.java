@@ -1,6 +1,6 @@
 package org.example;
 
-public enum MovementtypeEnum {
+public enum MovementTypeEnum {
     IN,
     OUT
 }

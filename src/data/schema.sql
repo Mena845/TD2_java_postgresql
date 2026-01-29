@@ -19,7 +19,7 @@ CREATE TABLE dish_ingredient (
                                  PRIMARY KEY (dish_id, ingredient_id)
 );
 
-create type mouvement_type as enum ('IN','OUT');
+create type movement_type as enum ('IN','OUT');
 CREATE TYPE unit_type AS ENUM ('KG');
 
 
@@ -28,10 +28,12 @@ CREATE table stock_movement (
                             id_ingredient int,
                             quantity numeric (10 ,2) ,
                             unit unit_type,
-                            type mouvement_type,
+                            type movement_type,
                             creation_datetime timestamp with time zone,
-                            foreign key (id_ingredient) references ingredient(id)
-)
+                            CONSTRAINT fk_stock_ingredient
+                                FOREIGN KEY (id_ingredient)
+                                    REFERENCES ingredient(id)
+);
 
 create table order (
     id serial primary key ,

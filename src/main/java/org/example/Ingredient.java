@@ -1,5 +1,6 @@
 package org.example;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Ingredient {
@@ -10,7 +11,8 @@ public class Ingredient {
     private CategoryEnum category;
     private Double requiredQuantity;
     private Dish dish;
-    private List<StockMouvement>
+    private List<StockMovement> stockMovementList = new ArrayList<>();
+
 
     public Ingredient(Integer id, String name, double price,
                       CategoryEnum category, Double requiredQuantity, Dish dish) {
@@ -40,4 +42,12 @@ public class Ingredient {
     public Double getRequiredQuantity() { return requiredQuantity; }
 
     public Dish getDish() { return dish; }
+    public List<StockMovement> getStockMovementList() {
+        return stockMovementList;
+    }
+
+    public void setStockMovementList(List<StockMovement> stockMovementList) {
+        this.stockMovementList = stockMovementList;
+    }
+
 }
