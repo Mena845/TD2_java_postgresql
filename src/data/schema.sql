@@ -35,8 +35,25 @@ CREATE table stock_movement (
                                     REFERENCES ingredient(id)
 );
 
-create table order (
-    id serial primary key ,
-    reference varchar(255),
-    creation_dateTime timestamp with time zone
-)
+
+CREATE TYPE payment_status AS ENUM ('UNPAID', 'PAID');
+
+CREATE TABLE IF NOT EXISTS orders (
+                                      id SERIAL PRIMARY KEY,
+                                      reference VARCHAR(100) UNIQUE NOT NULL,
+                                      creation_datetime TIMESTAMP NOT NULL DEFAULT now(),
+                                      payment_status payment_status NOT NULL DEFAULT 'UNPAID'
+);
+
+
+CREATE TABLE IF NOT EXISTS sale (
+                                    id SERIAL PRIMARY KEY,
+                                    creation_datetime TIMESTAMP NOT NULL DEFAULT now(),
+                                    order_id INT UNIQUE NOT NULL,
+                                    CONSTRAINT fk_sale_order
+                                        FOREIGN KEY (order_id)
+                                            REFERENCES orders(id)
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS uq_sale_order
+    ON sale(order_id); --empeche
