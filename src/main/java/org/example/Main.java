@@ -76,5 +76,11 @@ public class Main {
         } catch (RuntimeException e) {
             System.out.println("Échec insertion ingrédients : " + e.getMessage());
         }
+        Order order = dr.findOrderByReference("CMD-001");
+        order.setPaymentStatus(PaymentStatusEnum.PAID);
+
+        Sale sale = dr.createSaleFrom(order);
+        System.out.println("Vente créée à : " + sale.getCreationDatetime());
+
     }
 }

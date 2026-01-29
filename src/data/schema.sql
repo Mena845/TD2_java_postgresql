@@ -57,3 +57,4 @@ CREATE TABLE IF NOT EXISTS sale (
 
 CREATE UNIQUE INDEX IF NOT EXISTS uq_sale_order
     ON sale(order_id); --empeche
+

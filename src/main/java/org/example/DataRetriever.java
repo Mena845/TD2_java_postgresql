@@ -282,4 +282,54 @@ public class DataRetriever {
     }
 
 
+    public Order findOrderByReference(String reference) {
+
+        String sql = """
+        SELECT o.id, o.reference, o.creation_datetime, o.payment_status,
+               s.id AS sale_id, s.creation_datetime AS sale_datetime
+        FROM "order" o
+        LEFT JOIN sale s ON s.id_order = o.id
+        WHERE o.reference = ?
+    """;
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, reference);
+
+            try (ResultSet rs = ps.executeQuery()) {
+
+                if (!rs.next()) {
+                    throw new RuntimeException(
+                            "Commande introuvable pour la référence : " + reference
+                    );
+                }
+
+                Order order = new Order(
+                        rs.getInt("id"),
+                        rs.getString("reference"),
+                        rs.getTimestamp("creation_datetime").toInstant(),
+                        PaymentStatusEnum.valueOf(rs.getString("payment_status"))
+                );
+
+                // Vente associée (optionnelle)
+                if (rs.getObject("sale_id") != null) {
+                    Sale sale = new Sale(
+                            rs.getInt("sale_id"),
+                            rs.getTimestamp("sale_datetime").toInstant(),
+                            order
+                    );
+                    order.setSale(sale);
+                }
+
+                return order;
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
+
 }
