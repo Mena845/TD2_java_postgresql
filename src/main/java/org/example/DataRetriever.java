@@ -222,4 +222,64 @@ public class DataRetriever {
         }
     }
 
+
+    public Sale createSaleFrom(Order order) {
+
+        if (order == null || order.getId() == null) {
+            throw new IllegalArgumentException("Commande invalide");
+        }
+
+        // Règle métier 1 : commande obligatoirement PAYÉE
+        if (order.getPaymentStatus() != PaymentStatusEnum.PAID) {
+            throw new IllegalStateException(
+                    "Une vente ne peut être créée que pour une commande payée"
+            );
+        }
+
+        String checkSaleSql = "SELECT id FROM sale WHERE id_order = ?";
+        String insertSaleSql = """
+        INSERT INTO sale(id_order, creation_datetime)
+        VALUES (?, now())
+        ON CONFLICT (id_order) DO NOTHING
+        RETURNING id, creation_datetime
+    """;
+
+        try (Connection conn = DBConnection.getConnection()) {
+
+            /* ===== Vérifier si une vente existe déjà ===== */
+            try (PreparedStatement check = conn.prepareStatement(checkSaleSql)) {
+                check.setInt(1, order.getId());
+
+                try (ResultSet rs = check.executeQuery()) {
+                    if (rs.next()) {
+                        throw new IllegalStateException(
+                                "Cette commande est déjà associée à une vente"
+                        );
+                    }
+                }
+            }
+
+            /* ===== Création de la vente ===== */
+            try (PreparedStatement insert = conn.prepareStatement(insertSaleSql)) {
+                insert.setInt(1, order.getId());
+
+                try (ResultSet rs = insert.executeQuery()) {
+                    if (rs.next()) {
+                        return new Sale(
+                                rs.getInt("id"),
+                                rs.getTimestamp("creation_datetime").toInstant(),
+                                order
+                        );
+                    }
+                }
+            }
+
+            throw new RuntimeException("Échec de la création de la vente");
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
 }
