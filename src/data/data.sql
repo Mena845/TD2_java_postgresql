@@ -39,4 +39,28 @@ INSERT INTO stock_movement (id_ingredient, quantity, type, unit, creation_dateti
                                                                                         (5, 0.2, 'OUT', 'KG', '2024-01-06 12:00');
 
 
+INSERT INTO orders (reference, payment_status)
+VALUES
+    ('CMD-001', 'UNPAID'),
+    ('CMD-002', 'PAID'),
+    ('CMD-003', 'PAID');
+
+
+INSERT INTO sale (order_id)
+VALUES (
+           (SELECT id FROM orders WHERE reference = 'CMD-002')
+       );
+
+-- Ceci doit être bloqué par l'application (Java)
+INSERT INTO sale (order_id)
+VALUES (
+           (SELECT id FROM orders WHERE reference = 'CMD-001')
+       );
+
+INSERT INTO sale (order_id)
+VALUES (
+           (SELECT id FROM orders WHERE reference = 'CMD-002')
+       );
+
+
 
