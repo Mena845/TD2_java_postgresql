@@ -2,6 +2,7 @@ package org.example;
 
 import java.sql.*;
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -226,55 +227,47 @@ public class DataRetriever {
     public Sale createSaleFrom(Order order) {
 
         if (order == null || order.getId() == null) {
-            throw new IllegalArgumentException("Commande invalide");
+            throw new RuntimeException("Commande invalide");
         }
 
-        // Règle métier 1 : commande obligatoirement PAYÉE
         if (order.getPaymentStatus() != PaymentStatusEnum.PAID) {
-            throw new IllegalStateException(
-                    "Une vente ne peut être créée que pour une commande payée"
+            throw new RuntimeException(
+                    "Une vente ne peut être créée que pour une commande PAYÉE"
             );
         }
 
-        String checkSaleSql = "SELECT id FROM sale WHERE id_order = ?";
-        String insertSaleSql = """
-        INSERT INTO sale(id_order, creation_datetime)
-        VALUES (?, now())
-        ON CONFLICT (id_order) DO NOTHING
-        RETURNING id, creation_datetime
+        String checkSale = "SELECT 1 FROM sale WHERE order_id = ?";
+        String insertSale = """
+        INSERT INTO sale(order_id, creation_datetime)
+        VALUES (?, ?)
+        RETURNING id
     """;
 
         try (Connection conn = DBConnection.getConnection()) {
 
-            /* ===== Vérifier si une vente existe déjà ===== */
-            try (PreparedStatement check = conn.prepareStatement(checkSaleSql)) {
+            // Vérifier unicité commande → vente
+            try (PreparedStatement check = conn.prepareStatement(checkSale)) {
                 check.setInt(1, order.getId());
-
-                try (ResultSet rs = check.executeQuery()) {
-                    if (rs.next()) {
-                        throw new IllegalStateException(
-                                "Cette commande est déjà associée à une vente"
-                        );
-                    }
+                if (check.executeQuery().next()) {
+                    throw new RuntimeException(
+                            "Cette commande est déjà associée à une vente"
+                    );
                 }
             }
 
-            /* ===== Création de la vente ===== */
-            try (PreparedStatement insert = conn.prepareStatement(insertSaleSql)) {
-                insert.setInt(1, order.getId());
+            try (PreparedStatement ps = conn.prepareStatement(insertSale)) {
+                ps.setInt(1, order.getId());
+                ps.setTimestamp(2, Timestamp.from(Instant.now()));
 
-                try (ResultSet rs = insert.executeQuery()) {
-                    if (rs.next()) {
-                        return new Sale(
-                                rs.getInt("id"),
-                                rs.getTimestamp("creation_datetime").toInstant(),
-                                order
-                        );
-                    }
-                }
+                ResultSet rs = ps.executeQuery();
+                rs.next();
+
+                return new Sale(
+                                        rs.getInt(1),
+                        Instant.now(),
+                        order
+                                );
             }
-
-            throw new RuntimeException("Échec de la création de la vente");
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -282,48 +275,33 @@ public class DataRetriever {
     }
 
 
+
     public Order findOrderByReference(String reference) {
 
         String sql = """
-        SELECT o.id, o.reference, o.creation_datetime, o.payment_status,
-               s.id AS sale_id, s.creation_datetime AS sale_datetime
-        FROM "orders" o
-        LEFT JOIN sale s ON s.order_id = o.id
-        WHERE o.reference = ?
+        SELECT id, reference, creation_datetime, payment_status
+        FROM orders
+        WHERE reference = ?
     """;
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, reference);
+            ResultSet rs = ps.executeQuery();
 
-            try (ResultSet rs = ps.executeQuery()) {
-
-                if (!rs.next()) {
-                    throw new RuntimeException(
-                            "Commande introuvable pour la référence : " + reference
-                    );
-                }
-
-                Order order = new Order(
-                        rs.getInt("id"),
-                        rs.getString("reference"),
-                        rs.getTimestamp("creation_datetime").toInstant(),
-                        PaymentStatusEnum.valueOf(rs.getString("payment_status"))
+            if (!rs.next()) {
+                throw new RuntimeException(
+                        "Commande introuvable pour la référence : " + reference
                 );
-
-                // Vente associée (optionnelle)
-                if (rs.getObject("sale_id") != null) {
-                    Sale sale = new Sale(
-                            rs.getInt("sale_id"),
-                            rs.getTimestamp("sale_datetime").toInstant(),
-                            order
-                    );
-                    order.setSale(sale);
-                }
-
-                return order;
             }
+
+            return new Order(
+                    rs.getInt("id"),
+                    rs.getString("reference"),
+                    rs.getTimestamp("creation_datetime").toInstant(),
+                    PaymentStatusEnum.valueOf(rs.getString("payment_status"))
+            );
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -332,70 +310,49 @@ public class DataRetriever {
 
 
 
+
     public Order saveOrder(Order orderToSave) {
 
-        if (orderToSave == null) {
-            throw new IllegalArgumentException("Commande invalide");
-        }
-
         String insertSql = """
-        INSERT INTO orders (reference, creation_datetime, payment_status)
-        VALUES (?, ?, ?)
+        INSERT INTO orders(reference, creation_datetime, payment_status)
+        VALUES (?, ?, ?::payment_status)
         RETURNING id
     """;
 
         String updateSql = """
         UPDATE orders
-        SET payment_status = ?
+        SET payment_status = ?::payment_status
         WHERE id = ?
-    """;
-
-        String checkStatusSql = """
-        SELECT payment_status FROM orders WHERE id = ?
     """;
 
         try (Connection conn = DBConnection.getConnection()) {
 
-            /* ===== Création ===== */
-            if (orderToSave.getId() == null) {
+            // 🔒 Interdiction de modifier une commande PAYÉE
+            if (orderToSave.getId() != null) {
+                Order existing = findOrderByReference(orderToSave.getReference());
+                if (existing.getPaymentStatus() == PaymentStatusEnum.PAID) {
+                    throw new RuntimeException(
+                            "La commande est déjà PAYÉE et ne peut plus être modifiée"
+                    );
+                }
+            }
 
+            if (orderToSave.getId() == null) {
                 try (PreparedStatement ps = conn.prepareStatement(insertSql)) {
                     ps.setString(1, orderToSave.getReference());
                     ps.setTimestamp(2, Timestamp.from(orderToSave.getCreationDatetime()));
                     ps.setString(3, orderToSave.getPaymentStatus().name());
 
-                    try (ResultSet rs = ps.executeQuery()) {
-                        rs.next();
-                        orderToSave.setId(rs.getInt(1));
-                    }
+                    ResultSet rs = ps.executeQuery();
+                    rs.next();
+                    orderToSave.setId(rs.getInt(1));
                 }
-
-                return orderToSave;
-            }
-
-            /* ===== Vérifier statut PAYÉ ===== */
-            try (PreparedStatement check = conn.prepareStatement(checkStatusSql)) {
-                check.setInt(1, orderToSave.getId());
-
-                try (ResultSet rs = check.executeQuery()) {
-                    if (rs.next()) {
-                        PaymentStatusEnum current =
-                                PaymentStatusEnum.valueOf(rs.getString("payment_status"));
-
-                        if (current == PaymentStatusEnum.PAID) {
-                            throw new IllegalStateException(
-                                    "La commande est déjà payée et ne peut plus être modifiée"
-                            );
-                        }
-                    }
+            } else {
+                try (PreparedStatement ps = conn.prepareStatement(updateSql)) {
+                    ps.setString(1, orderToSave.getPaymentStatus().name());
+                    ps.setInt(2, orderToSave.getId());
+                    ps.executeUpdate();
                 }
-            }
-
-            /* ===== Mise à jour ===== */
-            try (PreparedStatement ps = conn.prepareStatement(updateSql)) {
-                ps.setString(1, orderToSave.getPaymentStatus().name());
-                ps.setInt(2, orderToSave.getId());
-                ps.executeUpdate();
             }
 
             return orderToSave;
@@ -404,6 +361,7 @@ public class DataRetriever {
             throw new RuntimeException(e);
         }
     }
+
 
 
 
